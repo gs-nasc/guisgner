@@ -1,48 +1,704 @@
+
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <title>Guisgner</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GUISGNER — Brand Strategy, Methodology & Creative Direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --storm:#a4a7aa;        /* céu de tempestade */
+  --storm-deep:#8e9195;
+  --clear:#efe8da;        /* céu aberto, quente */
+  --ink:#0a0a0a;
+  --sun:#ffc23a;
+  --sun-core:#ffdd7a;
+  --mono:'Space Mono', monospace;
+  --display:'Archivo', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--storm);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+::selection{background:var(--ink);color:var(--clear)}
+
+/* ---------- RAIN CANVAS (blend difference => negativo sobre texto preto) ---------- */
+#rain{
+  position:fixed;inset:0;width:100vw;height:100vh;
+  z-index:60;pointer-events:none;
+  mix-blend-mode:difference;
+}
+/* relâmpago ocasional (Baixada Santista ⚡) */
+#flash{
+  position:fixed;inset:0;background:#fff;opacity:0;
+  z-index:55;pointer-events:none;transition:opacity .12s ease-out;
+}
+
+/* ---------- NAV ---------- */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 40px 14px;
+  border-bottom:1px solid #fff;
+  font-weight:700;letter-spacing:.06em;
+  color:#fff;
+  mix-blend-mode:difference;
+}
+nav .name{display:flex;gap:.5ch;white-space:nowrap}
+nav .name .dim{opacity:.38}
+nav .links{display:flex;gap:34px}
+nav a{color:#fff;text-decoration:none}
+nav a:hover .in, nav .name:hover .in{background:#fff;color:#000}
+nav a:focus-visible{outline:2px solid #fff;outline-offset:4px}
+.lang{
+  position:fixed;top:64px;left:40px;z-index:200;font-family:var(--mono);
+  font-size:13px;letter-spacing:.08em;
+  color:#fff;mix-blend-mode:difference;
+}
+.lang button{
+  background:none;border:none;font:inherit;cursor:pointer;color:#fff;opacity:.4;padding:2px 2px;
+}
+.lang button[aria-pressed="true"]{opacity:1;font-weight:700;text-decoration:underline}
+.lang button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* ---------- HERO / TEMPESTADE ---------- */
+#storm{height:230vh;position:relative;z-index:1}
+.storm-stage{
+  position:sticky;top:0;height:100vh;overflow:hidden;
+  display:flex;align-items:center;
+  background:var(--storm); /* sincronizado via JS; necessário para o blend dos filhos */
+}
+/* Plano em perspectiva ancorado no CANTO INFERIOR ESQUERDO.
+   Geometria: a borda DIREITA do plano fica em z=0 (escala natural, bloco ≈ 100vh)
+   e o plano recua para trás/esquerda, encolhendo até ~10vh na borda esquerda.
+   Rotacionar a partir da borda direita garante que nada cruza o plano do olho. */
+.corner{
+  position:absolute;inset:0;
+  perspective:36vw;             /* focal longo: crescimento suave, sem distorção de grande-angular */
+  perspective-origin:0% 100%;   /* ponto de fuga: canto inferior esquerdo */
+  z-index:1;
+}
+.wall-left{
+  position:absolute;right:-4vw;bottom:0;width:260vw;
+  transform-origin:100% 100%;   /* gira em torno da borda direita/inferior */
+  transform:rotateY(-60deg);    /* 60°: a "janela" de plano visível fica maior que uma palavra inteira */
+  overflow:hidden;
+  will-change:transform;
+}
+.kword{
+  display:block;overflow:hidden;
+  font-family:var(--display);
+  font-weight:900;
+  font-stretch:118%;
+  text-transform:uppercase;
+  line-height:.78;
+  letter-spacing:-.03em;
+  white-space:nowrap;
+  color:var(--ink);
+}
+/* tamanhos por linha, em vw: BRAND (5 letras) e & DESIGN (8) ficam com a MESMA largura,
+   e cada palavra inteira (~175vw) cabe dentro da janela visível do plano (~208vw) */
+.kword:nth-child(1){font-size:52vw}
+.kword:nth-child(2){font-size:39vw}
+/* máscara de entrada (sobe) + esteira contínua (desliza) em elementos separados,
+   para as duas animações não brigarem pelo mesmo transform */
+.kword .rise{
+  display:inline-block;
+  transform:translateY(115%);
+  animation:riseIn .8s cubic-bezier(.16,1,.3,1) forwards;
+  will-change:transform;
+}
+.kword:nth-child(1) .rise{animation-delay:.05s}
+.kword:nth-child(2) .rise{animation-delay:.18s}
+@keyframes riseIn{to{transform:translateY(0)}}
+.kword .track{
+  display:inline-block;white-space:nowrap;
+  animation:slideL var(--dur,30s) linear infinite;
+  will-change:transform;
+}
+.kword:nth-child(1) .track{--dur:26s;animation-delay:-8s}
+.kword:nth-child(2) .track{--dur:34s;animation-direction:reverse;animation-delay:-16s}
+@keyframes slideL{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* pingos escorrendo do texto */
+.drip{
+  position:absolute;width:3px;background:var(--ink);
+  transform-origin:top;border-radius:0 0 2px 2px;
+  animation:dripFall linear forwards;
+  pointer-events:none;
+}
+@keyframes dripFall{
+  0%  {transform:scaleY(0) translateY(0);opacity:1}
+  35% {transform:scaleY(1) translateY(0);opacity:1}
+  100%{transform:scaleY(.6) translateY(46vh);opacity:0}
+}
+.hero-meta{
+  position:absolute;right:40px;bottom:40px;max-width:340px;
+  font-size:14px;line-height:1.75;text-align:left;z-index:5;
+  color:#fff;mix-blend-mode:difference;
+}
+.hero-meta .tag{font-weight:700;display:block;margin-bottom:8px}
+.scroll-hint{
+  position:absolute;left:40px;bottom:40px;font-size:12px;letter-spacing:.2em;
+  text-transform:uppercase;opacity:.85;z-index:5;
+  color:#fff;mix-blend-mode:difference;
+}
+
+/* ---------- SOL ---------- */
+#sunrise{height:220vh;position:relative}
+.sun-stage{
+  position:sticky;top:0;height:100vh;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.sun{
+  position:relative;
+  width:min(72vmin,680px);height:min(72vmin,680px);
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 42%, var(--sun-core) 0%, var(--sun) 55%, var(--sun) 100%);
+  box-shadow:0 0 120px 40px rgba(255,194,58,.55), 0 0 300px 120px rgba(255,194,58,.25);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:8%;
+  transform:scale(.15);opacity:0;
+  will-change:transform,opacity;
+}
+.sun h1{
+  font-family:var(--display);font-weight:900;font-stretch:110%;
+  text-transform:uppercase;letter-spacing:-.01em;
+  font-size:clamp(38px,8.5vmin,84px);line-height:.9;margin-bottom:18px;
+}
+.sun p{font-size:clamp(11px,1.9vmin,15px);font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+
+/* ---------- CONTEÚDO ---------- */
+main section.block{
+  padding:130px 40px;max-width:1180px;margin:0 auto;
+  border-top:1px solid var(--ink);
+}
+.eyebrow{
+  font-size:12px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;
+  margin-bottom:42px;display:flex;align-items:center;gap:14px;
+}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--ink);opacity:.35}
+.about-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:60px}
+.about-grid .lead{
+  font-family:var(--display);font-weight:900;font-stretch:110%;
+  font-size:clamp(28px,3.6vw,46px);line-height:1.02;text-transform:uppercase;
+}
+.about-grid .body p{margin-bottom:1.2em;max-width:62ch}
+
+.xp{list-style:none}
+.xp li{
+  display:grid;grid-template-columns:150px 220px 1fr;gap:28px;
+  padding:26px 0;border-bottom:1px solid rgba(10,10,10,.3);
+  align-items:baseline;
+}
+.xp .co{font-family:var(--display);font-weight:900;font-stretch:112%;font-size:24px;text-transform:uppercase;letter-spacing:.01em}
+.xp .role{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.75}
+.xp .desc{font-size:14px;max-width:60ch}
+
+.marquee-wrap{overflow:hidden;border-top:1px solid var(--ink);padding:56px 0;background:var(--ink);color:var(--clear)}
+.marquee-label{max-width:1180px;margin:0 auto 26px;padding:0 40px;font-size:12px;font-weight:700;letter-spacing:.28em;text-transform:uppercase}
+.marquee{display:flex;width:max-content;animation:mq 32s linear infinite}
+.marquee span{
+  font-family:var(--display);font-weight:900;font-stretch:115%;text-transform:uppercase;
+  font-size:clamp(40px,6vw,84px);line-height:1;white-space:nowrap;padding:0 .45em;
+}
+.marquee span::after{content:"✳";font-family:var(--mono);font-weight:400;font-size:.45em;vertical-align:.55em;padding-left:.9em;opacity:.6}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+footer{
+  border-top:1px solid var(--ink);padding:110px 40px 60px;
+  max-width:1180px;margin:0 auto;
+}
+footer .big{
+  font-family:var(--display);font-weight:900;font-stretch:115%;text-transform:uppercase;
+  font-size:clamp(54px,11vw,170px);line-height:.85;margin-bottom:48px;
+  white-space:nowrap;
+}
+footer .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;font-size:13px}
+footer a{color:var(--ink);font-weight:700;text-decoration:none;letter-spacing:.08em}
+footer a:hover{background:var(--ink);color:var(--clear)}
+
+/* ---------- CURSOR ---------- */
+html.has-cursor, html.has-cursor a, html.has-cursor button{cursor:none}
+.cursor-dot,.cursor-ring,.cursor-ripple{
+  position:fixed;top:0;left:0;pointer-events:none;
+  mix-blend-mode:difference;z-index:500;
+}
+.cursor-dot{
+  width:8px;height:8px;border-radius:50%;background:#fff;
+  transform:translate(-50%,-50%);
+}
+.cursor-ring{
+  width:42px;height:42px;border-radius:50%;
+  border:1.5px solid #fff;
+  will-change:transform;
+}
+.cursor-ring.filled{background:#fff}
+.cursor-ripple{
+  width:42px;height:42px;border-radius:50%;
+  border:1.5px solid #fff;
+}
+
+/* ---------- RESPONSIVO ---------- */
+@media (max-width:820px){
+  nav{padding:16px 20px 12px;font-size:12px}
+  nav .links{gap:16px}
+  .lang{left:20px;top:56px}
+  .hero-meta{right:20px;bottom:88px;max-width:70vw;font-size:12px}
+  .scroll-hint{left:20px;bottom:28px}
+  main section.block{padding:90px 20px}
+  .about-grid{grid-template-columns:1fr;gap:34px}
+  .xp li{grid-template-columns:1fr;gap:6px}
+  footer{padding:90px 20px 50px}
+}
+@media (prefers-reduced-motion:reduce){
+  .kword .rise{animation-duration:.01s}
+  .kword .track{animation:none}
+  .marquee{animation-duration:240s}
+}
+</style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="logo">Guisgner</div>
-        <div class="nav-links">
-            <a href="#">Work</a>
-            <a href="#">Contact</a>
-            <a href="#">About</a>
-        </div>
+
+<canvas id="rain" aria-hidden="true"></canvas>
+<div id="flash" aria-hidden="true"></div>
+
+<nav>
+  <div class="name">GUILHERME <span>[ <span class="in">GUISGNER</span> ]</span> <span class="dim">COSTA</span></div>
+  <div class="links">
+    <a href="#work">[ <span class="in" data-i18n="work">WORK</span> ]</a>
+    <a href="#about">[ <span class="in" data-i18n="about">ABOUT</span> ]</a>
+    <a href="#contact">[ <span class="in" data-i18n="contact">CONTACT</span> ]</a>
+  </div>
+</nav>
+<div class="lang" role="group" aria-label="Language">
+  <button id="btn-en" aria-pressed="true">EN</button> /
+  <button id="btn-pt" aria-pressed="false">PT-BR</button>
+</div>
+
+<!-- =========== TEMPESTADE =========== -->
+<section id="storm" aria-label="Intro">
+  <div class="storm-stage">
+    <div class="corner">
+      <div class="wall-left" id="wallLeft">
+        <span class="kword" data-drip><span class="rise"><span class="track">BRAND&nbsp;&nbsp;BRAND&nbsp;&nbsp;BRAND&nbsp;&nbsp;BRAND&nbsp;&nbsp;BRAND&nbsp;&nbsp;BRAND&nbsp;&nbsp;</span></span></span>
+        <span class="kword" data-drip><span class="rise"><span class="track">&amp;&nbsp;DESIGN&nbsp;&nbsp;&amp;&nbsp;DESIGN&nbsp;&nbsp;&amp;&nbsp;DESIGN&nbsp;&nbsp;&amp;&nbsp;DESIGN&nbsp;&nbsp;&amp;&nbsp;DESIGN&nbsp;&nbsp;&amp;&nbsp;DESIGN&nbsp;&nbsp;</span></span></span>
+      </div>
     </div>
-
-    <div class="hero">
-        <p class="first">
-            Brand
-        </p>
-        <p class="second">
-            & Design
-        </p>
+    <div class="hero-meta">
+      <span class="tag" data-i18n="metaTag">// SANTOS, SP — BRAZIL</span>
+      <span data-i18n="metaTxt">Born where lightning strikes the most in São Paulo. The storm is the challenge. The sun is the answer. Keep scrolling.</span>
     </div>
+    <div class="scroll-hint" data-i18n="hint">SCROLL → THE SKY OPENS</div>
+  </div>
+</section>
 
-    <div class="waiter">
-
+<!-- =========== SOL =========== -->
+<section id="sunrise" aria-label="Guisgner">
+  <div class="sun-stage">
+    <div class="sun" id="sun">
+      <h1>GUISGNER</h1>
+      <p data-i18n="sunSub">Brand Strategy, Methodology &amp; Creative Direction</p>
     </div>
+  </div>
+</section>
 
-    <div class="sun-area">
-        <div class="sun"></div>
-        <div class="sun-rays">
-            <div class="ray"></div>
-            <div class="ray"></div>
-            <div class="ray"></div>
-            <div class="ray"></div>
-            <div class="ray"></div>
-            <div class="ray"></div>
-            <div class="ray"></div>
-        </div>
+<main>
+  <!-- ABOUT -->
+  <section class="block" id="about">
+    <div class="eyebrow" data-i18n="aboutEyebrow">[ ABOUT ] AFTER THE STORM</div>
+    <div class="about-grid">
+      <div class="lead" data-i18n="aboutLead">A brand is a living system — strategy, organization, narrative and creative direction.</div>
+      <div class="body">
+        <p data-i18n="aboutP1">Guilherme Costa is a Branding Designer and Creative Lead based in Santos, SP, working at the intersection of strategy, methodology and visual direction.</p>
+        <p data-i18n="aboutP2">His trajectory is defined by a structural approach to design — beginning with the rational and creative construction of visual identities, exploring mathematical proportions and modular systems, and evolving into the strategic field of branding, where positioning, brand architecture and planning became central to his creative process.</p>
+        <p data-i18n="aboutP3">Influenced by thinkers such as David Aaker, Philip Kotler, Ana Couto and Galileu Nogueira, he structures his work around strategic clarity, systemic thinking and consistent execution — building brands with longevity, coherence and real impact.</p>
+      </div>
     </div>
+  </section>
 
-    <canvas id="rain"></canvas>
-    <script src="assets/script/script.js"></script>
+  <!-- WORK -->
+  <section class="block" id="work">
+    <div class="eyebrow" data-i18n="workEyebrow">[ WORK ] SELECTED EXPERIENCE</div>
+    <ul class="xp">
+      <li>
+        <span class="role" data-i18n="r1">Creative Lead</span>
+        <span class="co">Approve</span>
+        <span class="desc" data-i18n="d1">Led the creative team’s organization and strategic direction — methodologies, naming systems and planning structures. Key visuals, performance assets, retail and physical brand experiences for collections and collaborations.</span>
+      </li>
+      <li>
+        <span class="role" data-i18n="r2">Branding Designer</span>
+        <span class="co">Force One</span>
+        <span class="desc" data-i18n="d2">Brand refresh aligning identity, product and physical experience. Packaging, concept store environmental design, catalog systems and visual direction for events such as Brasil Game Show.</span>
+      </li>
+      <li>
+        <span class="role" data-i18n="r3">Designer</span>
+        <span class="co">Mood Marketing</span>
+        <span class="desc" data-i18n="d3">Strategic assets for social, paid media and digital product launches; restructuring of creative assets and workflow optimization.</span>
+      </li>
+      <li>
+        <span class="role" data-i18n="r4">Designer</span>
+        <span class="co">Americanas Empresas</span>
+        <span class="desc" data-i18n="d4">Key visuals and campaign unfoldings for seasonal initiatives, strategic partnerships and major commercial dates.</span>
+      </li>
+      <li>
+        <span class="role" data-i18n="r5">Brand Designer</span>
+        <span class="co">Karavel</span>
+        <span class="desc" data-i18n="d5">Led the brand redesign and strategic repositioning — art direction, key visual, landing pages and institutional materials focused on growth.</span>
+      </li>
+      <li>
+        <span class="role" data-i18n="r6">Freelance</span>
+        <span class="co">Bluefit</span>
+        <span class="desc" data-i18n="d6">Visual materials and strategic communication assets.</span>
+      </li>
+    </ul>
+  </section>
+</main>
+
+<!-- COLABORAÇÕES -->
+<div class="marquee-wrap" aria-label="Collaborations">
+  <div class="marquee-label" data-i18n="collab">[ COLLABS ] PROJECTS DEVELOPED WITH</div>
+  <div class="marquee" id="marquee">
+    <span>Bulova</span><span>Corinthians</span><span>NBA</span><span>Vasco da Gama</span><span>Grêmio</span><span>Internacional</span><span>NFL</span><span>Fanta</span><span>OMO</span><span>Copag</span>
+  </div>
+</div>
+
+<footer id="contact">
+  <div class="big" data-i18n="ctaBig">AFTER RAIN,<br>LET’S TALK.</div>
+  <div class="row">
+    <span>© 2026 GUILHERME “GUISGNER” COSTA</span>
+    <span>
+      <a href="#">[ LINKEDIN ]</a>&nbsp;&nbsp;
+      <a href="#">[ BEHANCE ]</a>&nbsp;&nbsp;
+      <a href="#">[ E-MAIL ]</a>
+    </span>
+    <span data-i18n="footNote">SANTOS, SP — WHERE LIGHTNING STRIKES THE MOST ⚡</span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* ============================================================
+   CHUVA — canvas com mix-blend-mode: difference
+   (branco sobre cinza = chuva escura; branco sobre texto preto = negativo)
+   ============================================================ */
+const canvas = document.getElementById('rain');
+const ctx = canvas.getContext('2d');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let W, H, DPR;
+function resize(){
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+resize(); addEventListener('resize', resize);
+
+const MAX_DROPS = 380;
+const drops = Array.from({length: MAX_DROPS}, () => spawn(true));
+function spawn(anywhere){
+  return {
+    x: Math.random()*W*1.4 - W*0.2,
+    y: anywhere ? Math.random()*H : -30 - Math.random()*H*0.3,
+    len: 12 + Math.random()*26,
+    sp: 9 + Math.random()*13,
+    a: .35 + Math.random()*.5
+  };
+}
+
+/* vento controlado pelo mouse (arraste horizontal muda a direção) */
+let wind = 0, targetWind = 0;
+addEventListener('pointermove', e => {
+  targetWind = ((e.clientX / W) - 0.5) * 1.6;   // -0.8 .. 0.8
+});
+
+/* intensidade da chuva cai conforme o sol aparece */
+let intensity = 1;
+
+function drawRain(){
+  ctx.clearRect(0,0,W,H);
+  if (intensity > 0.01 && !reduced){
+    wind += (targetWind - wind) * 0.04;
+    const active = Math.floor(MAX_DROPS * intensity);
+    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = '#fff';
+    for (let i=0;i<active;i++){
+      const d = drops[i];
+      ctx.globalAlpha = d.a * Math.min(1,intensity*1.4);
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y);
+      ctx.lineTo(d.x + wind*d.len, d.y + d.len);
+      ctx.stroke();
+      d.y += d.sp;
+      d.x += wind * d.sp;
+      if (d.y > H + 40 || d.x < -W*0.3 || d.x > W*1.3) Object.assign(d, spawn(false));
+    }
+    ctx.globalAlpha = 1;
+  }
+  requestAnimationFrame(drawRain);
+}
+requestAnimationFrame(drawRain);
+
+/* ============================================================
+   RELÂMPAGO ocasional (só durante a tempestade)
+   ============================================================ */
+const flash = document.getElementById('flash');
+function lightning(){
+  if (!reduced && intensity > 0.5 && Math.random() < 0.5){
+    flash.style.opacity = .55;
+    setTimeout(()=> flash.style.opacity = 0, 90);
+    setTimeout(()=> { flash.style.opacity = .3; setTimeout(()=> flash.style.opacity=0, 70); }, 220);
+  }
+  setTimeout(lightning, 4000 + Math.random()*7000);
+}
+setTimeout(lightning, 3500);
+
+/* ============================================================
+   SCROLL — céu abre, sol nasce
+   ============================================================ */
+const sun = document.getElementById('sun');
+const sunEl = document.getElementById('sunrise');
+const stormStage = document.querySelector('.storm-stage');
+
+function hexToRgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16));}
+const cStorm = hexToRgb('a4a7aa'), cClear = hexToRgb('efe8da');
+const lerp = (a,b,t)=>a+(b-a)*t;
+
+function onScroll(){
+  const sunTop = sunEl.offsetTop;
+  const sunH = sunEl.offsetHeight - innerHeight;
+  const p = Math.min(1, Math.max(0, (scrollY - sunTop + innerHeight*0.6) / sunH)); // progresso do sol
+  intensity = 1 - p;
+
+  // sol cresce
+  const s = 0.15 + p*0.85;
+  sun.style.transform = `scale(${s})`;
+  sun.style.opacity = Math.min(1, p*1.6);
+
+  // céu clareia (body + palco do hero, para o blend "difference" enxergar a mesma cor)
+  const rgb = cStorm.map((c,i)=>Math.round(lerp(c, cClear[i], p)));
+  const sky = `rgb(${rgb.join(',')})`;
+  document.body.style.background = sky;
+  stormStage.style.background = sky;
+}
+addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+
+/* ============================================================
+   PINGOS escorrendo do texto do hero
+   ============================================================ */
+const wallLeft = document.getElementById('wallLeft');
+if (!reduced){
+  const words = [...wallLeft.querySelectorAll('[data-drip]')];
+  setInterval(()=>{
+    if (intensity < 0.4) return;                       // só pinga enquanto chove
+    if (document.hidden) return;
+    const w = words[Math.floor(Math.random()*words.length)];
+    const drip = document.createElement('div');
+    drip.className = 'drip';
+    drip.style.left = (6 + Math.random()*80) + '%';
+    drip.style.top = (w.offsetTop + w.offsetHeight*0.9) + 'px';
+    drip.style.height = (30 + Math.random()*70) + 'px';
+    drip.style.animationDuration = (1.6 + Math.random()*1.4) + 's';
+    wallLeft.appendChild(drip);
+    drip.addEventListener('animationend', ()=> drip.remove());
+  }, 380);
+}
+
+/* ============================================================
+   MARQUEE — duplica conteúdo para loop
+   ============================================================ */
+const mq = document.getElementById('marquee');
+mq.innerHTML += mq.innerHTML;
+
+/* ============================================================
+   EN / PT-BR
+   ============================================================ */
+const i18n = {
+  en:{
+    work:'WORK', about:'ABOUT', contact:'CONTACT',
+    metaTag:'// SANTOS, SP — BRAZIL',
+    metaTxt:'Born where lightning strikes the most in São Paulo. The storm is the challenge. The sun is the answer. Keep scrolling.',
+    hint:'SCROLL → THE SKY OPENS',
+    sunSub:'Brand Strategy, Methodology & Creative Direction',
+    aboutEyebrow:'[ ABOUT ] AFTER THE STORM',
+    aboutLead:'A brand is a living system — strategy, organization, narrative and creative direction.',
+    aboutP1:'Guilherme Costa is a Branding Designer and Creative Lead based in Santos, SP, working at the intersection of strategy, methodology and visual direction.',
+    aboutP2:'His trajectory is defined by a structural approach to design — beginning with the rational and creative construction of visual identities, exploring mathematical proportions and modular systems, and evolving into the strategic field of branding, where positioning, brand architecture and planning became central to his creative process.',
+    aboutP3:'Influenced by thinkers such as David Aaker, Philip Kotler, Ana Couto and Galileu Nogueira, he structures his work around strategic clarity, systemic thinking and consistent execution — building brands with longevity, coherence and real impact.',
+    workEyebrow:'[ WORK ] SELECTED EXPERIENCE',
+    r1:'Creative Lead', r2:'Branding Designer', r3:'Designer', r4:'Designer', r5:'Brand Designer', r6:'Freelance',
+    d1:'Led the creative team’s organization and strategic direction — methodologies, naming systems and planning structures. Key visuals, performance assets, retail and physical brand experiences for collections and collaborations.',
+    d2:'Brand refresh aligning identity, product and physical experience. Packaging, concept store environmental design, catalog systems and visual direction for events such as Brasil Game Show.',
+    d3:'Strategic assets for social, paid media and digital product launches; restructuring of creative assets and workflow optimization.',
+    d4:'Key visuals and campaign unfoldings for seasonal initiatives, strategic partnerships and major commercial dates.',
+    d5:'Led the brand redesign and strategic repositioning — art direction, key visual, landing pages and institutional materials focused on growth.',
+    d6:'Visual materials and strategic communication assets.',
+    collab:'[ COLLABS ] PROJECTS DEVELOPED WITH',
+    ctaBig:'AFTER RAIN,<br>LET’S TALK.',
+    footNote:'SANTOS, SP — WHERE LIGHTNING STRIKES THE MOST ⚡'
+  },
+  pt:{
+    work:'PROJETOS', about:'SOBRE', contact:'CONTATO',
+    metaTag:'// SANTOS, SP — BRASIL',
+    metaTxt:'Nascido onde mais caem raios em São Paulo. A tempestade é o desafio. O sol é a resposta. Continue rolando.',
+    hint:'ROLE → O TEMPO ABRE',
+    sunSub:'Estratégia de Marca, Metodologia & Direção Criativa',
+    aboutEyebrow:'[ SOBRE ] DEPOIS DA TEMPESTADE',
+    aboutLead:'Uma marca é um sistema vivo — estratégia, organização, narrativa e direção criativa.',
+    aboutP1:'Guilherme Costa é Branding Designer e Creative Lead baseado em Santos, SP, atuando na interseção entre estratégia, metodologia e direção visual.',
+    aboutP2:'Sua trajetória é definida por uma abordagem estrutural do design — da construção racional e criativa de identidades visuais, explorando proporções matemáticas e sistemas modulares, até o campo estratégico do branding, onde posicionamento, arquitetura de marca e planejamento se tornaram centrais no seu processo criativo.',
+    aboutP3:'Influenciado por pensadores como David Aaker, Philip Kotler, Ana Couto e Galileu Nogueira, estrutura seu trabalho em torno de clareza estratégica, pensamento sistêmico e execução consistente — construindo marcas com longevidade, coerência e impacto real.',
+    workEyebrow:'[ PROJETOS ] EXPERIÊNCIA SELECIONADA',
+    r1:'Creative Lead', r2:'Branding Designer', r3:'Designer', r4:'Designer', r5:'Brand Designer', r6:'Freelance',
+    d1:'Liderou a organização e direção estratégica do time criativo — metodologias, sistemas de naming e estruturas de planejamento. Key visuals, assets de performance, varejo e experiências físicas de marca para coleções e collabs.',
+    d2:'Refresh de marca alinhando identidade, produto e experiência física. Embalagens, ambientação de concept store, sistemas de catálogo e direção visual para eventos como a Brasil Game Show.',
+    d3:'Assets estratégicos para social, mídia paga e lançamentos de produtos digitais; reestruturação de assets criativos e otimização de fluxos.',
+    d4:'Key visuals e desdobramentos de campanha para iniciativas sazonais, parcerias estratégicas e grandes datas comerciais.',
+    d5:'Liderou o redesign e reposicionamento estratégico da marca — direção de arte, key visual, landing pages e materiais institucionais com foco em crescimento.',
+    d6:'Materiais visuais e assets de comunicação estratégica.',
+    collab:'[ COLLABS ] PROJETOS DESENVOLVIDOS COM',
+    ctaBig:'DEPOIS DA CHUVA,<br>VAMOS CONVERSAR.',
+    footNote:'SANTOS, SP — ONDE MAIS CAEM RAIOS ⚡'
+  }
+};
+const btnEN = document.getElementById('btn-en');
+const btnPT = document.getElementById('btn-pt');
+
+/* headline do footer sempre cabe: reduz a fonte até a linha mais longa caber */
+const bigEl = document.querySelector('footer .big');
+function fitBig(){
+  bigEl.style.fontSize = '';                                  // volta ao clamp do CSS
+  let size = parseFloat(getComputedStyle(bigEl).fontSize);
+  let guard = 8;
+  while (bigEl.scrollWidth > bigEl.clientWidth && guard-- > 0){
+    size *= bigEl.clientWidth / bigEl.scrollWidth * 0.99;     // salto proporcional
+    bigEl.style.fontSize = size + 'px';
+  }
+}
+addEventListener('resize', fitBig);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitBig);
+
+function setLang(l){
+  document.documentElement.lang = l === 'pt' ? 'pt-BR' : 'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.dataset.i18n;
+    if (i18n[l][k] !== undefined) el.innerHTML = i18n[l][k];
+  });
+  btnEN.setAttribute('aria-pressed', l==='en');
+  btnPT.setAttribute('aria-pressed', l==='pt');
+  fitBig();
+}
+btnEN.onclick = ()=> setLang('en');
+btnPT.onclick = ()=> setLang('pt');
+fitBig();
+
+/* ============================================================
+   CURSOR — gota de chuva
+   dot instantâneo + lente atrasada; estica na direção do movimento
+   como uma gota caindo; "splash" com ondas no clique; vira lente
+   de inversão sobre elementos interativos; links magnéticos
+   ============================================================ */
+if (window.gsap && !reduced && matchMedia('(hover:hover) and (pointer:fine)').matches){
+  document.documentElement.classList.add('has-cursor');
+
+  const dot = document.createElement('div');
+  dot.className = 'cursor-dot';
+  const ring = document.createElement('div');
+  ring.className = 'cursor-ring';
+  document.body.append(dot, ring);
+
+  gsap.set([dot, ring], {xPercent:-50, yPercent:-50, autoAlpha:0});
+
+  const dotX  = gsap.quickTo(dot,  'x', {duration:.12, ease:'power3'});
+  const dotY  = gsap.quickTo(dot,  'y', {duration:.12, ease:'power3'});
+  const ringX = gsap.quickTo(ring, 'x', {duration:.45, ease:'power3'});
+  const ringY = gsap.quickTo(ring, 'y', {duration:.45, ease:'power3'});
+
+  let mx = innerWidth/2, my = innerHeight/2, shown = false;
+  let state = 'default';
+
+  addEventListener('pointermove', e => {
+    mx = e.clientX; my = e.clientY;
+    if (!shown){ gsap.to([dot,ring], {autoAlpha:1, duration:.3}); shown = true; }
+    dotX(mx); dotY(my); ringX(mx); ringY(my);
+  });
+  document.addEventListener('mouseleave', ()=>{ gsap.to([dot,ring], {autoAlpha:0, duration:.3}); shown = false; });
+
+  /* estica a lente na direção do movimento (gota em queda) */
+  let px = mx, py = my;
+  const press = {v:1};
+  gsap.ticker.add(()=>{
+    const x = gsap.getProperty(ring,'x'), y = gsap.getProperty(ring,'y');
+    const vx = x - px, vy = y - py;
+    px = x; py = y;
+    if (state !== 'default') return;
+    const speed = Math.hypot(vx, vy);
+    gsap.set(ring, {
+      rotation: speed > 1 ? Math.atan2(vy, vx) * 180/Math.PI : gsap.getProperty(ring,'rotation'),
+      scaleX: (1 + Math.min(speed/120, .45)) * press.v,
+      scaleY: (1 - Math.min(speed/300, .22)) * press.v
+    });
+  });
+
+  /* estados sobre elementos */
+  function setState(next){
+    if (state === next) return;
+    state = next;
+    if (next === 'link'){
+      ring.classList.add('filled');
+      gsap.to(ring, {scaleX:1.5, scaleY:1.5, rotation:0, duration:.35, ease:'power3.out'});
+      gsap.to(dot,  {scale:0, duration:.25, ease:'power3.out'});
+    } else {
+      ring.classList.remove('filled');
+      gsap.to(ring, {scaleX:1, scaleY:1, duration:.35, ease:'power3.out'});
+      gsap.to(dot,  {scale:1, duration:.25, ease:'power3.out'});
+    }
+  }
+  document.addEventListener('pointerover', e => {
+    setState(e.target.closest('a, button') ? 'link' : 'default');
+  });
+
+  /* splash: a gota esborracha no clique e solta uma onda */
+  addEventListener('pointerdown', ()=>{
+    gsap.to(dot, {scale: state==='default' ? .5 : 0, duration:.15, ease:'power2.out'});
+    gsap.to(press, {v:.78, duration:.15, ease:'power2.out'});
+  });
+  addEventListener('pointerup', e => {
+    gsap.to(dot, {scale: state==='default' ? 1 : 0, duration:.5, ease:'elastic.out(1,.45)'});
+    gsap.to(press, {v:1, duration:.5, ease:'elastic.out(1,.5)'});
+    for (let i=0;i<2;i++){
+      const r = document.createElement('div');
+      r.className = 'cursor-ripple';
+      document.body.appendChild(r);
+      gsap.set(r, {x:e.clientX, y:e.clientY, xPercent:-50, yPercent:-50});
+      gsap.fromTo(r, {scale:.3, opacity:.9},
+        {scale:1.8 + i*1.2, opacity:0, duration:.6 + i*.25, ease:'power2.out',
+         delay:i*.08, onComplete:()=>r.remove()});
+    }
+  });
+
+  /* links magnéticos: nav, idioma e footer puxam levemente o cursor */
+  document.querySelectorAll('nav a, .lang button, footer a').forEach(el => {
+    const sx = gsap.quickTo(el, 'x', {duration:.3, ease:'power3'});
+    const sy = gsap.quickTo(el, 'y', {duration:.3, ease:'power3'});
+    el.addEventListener('pointermove', e => {
+      const b = el.getBoundingClientRect();
+      sx((e.clientX - (b.left + b.width/2)) * .3);
+      sy((e.clientY - (b.top + b.height/2)) * .35);
+    });
+    el.addEventListener('pointerleave', ()=>{ sx(0); sy(0); });
+  });
+}
+</script>
 </body>
 </html>
